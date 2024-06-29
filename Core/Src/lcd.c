@@ -7,10 +7,10 @@
 // http://www.pitlab.pl
 //////////////////////////////////////////////////////////////////////////////
 #include "lcd.h"
-#include "stm32f7xx_hal.h"
 #include "sys_def.h"
 #include <stdio.h>
 #include <math.h>
+#include "stm32f7xx_hal.h"
 
 
 
@@ -26,7 +26,6 @@ void InitDisplay(void)
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Wyświetl menu wyboru trybów pracy
 // Parametry: chPozycja - bieżąca pozyja menu
@@ -36,6 +35,7 @@ unsigned char Menu(unsigned char chPozycja)
 {
 	if (chRysujRaz)
 	{
+
 		LCD_clear();
 		setFont(MidFont);
 		setColor(GREEN);
@@ -55,15 +55,14 @@ unsigned char Menu(unsigned char chPozycja)
 		print(chNapis, 20, 100, 0);
 		sprintf(chNapis, "Setup 3");
 		print(chNapis, 20, 120, 0);
-		sprintf(chNapis, "Setup 4");
+		sprintf(chNapis, "Konwersja na czarno-biały");
 		print(chNapis, 20, 140, 0);
-		sprintf(chNapis, "Setup 5");
+		sprintf(chNapis, "Detekcja krawedzi");
 		print(chNapis, 20, 160, 0);
 		sprintf(chNapis, "Fraktale");
 		print(chNapis, 20, 180, 0);
 		sprintf(chNapis, "Pomocy, kabelki!");
 		print(chNapis, 20, 200, 0);
-
 		chRysujRaz = 0;
 		InitFraktal(0);
 	}
@@ -108,16 +107,16 @@ unsigned char Menu(unsigned char chPozycja)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Rysuj timer w��czenia pozycji menu
-// Parametry: chTryb - bie��cy tryb pracy
-// Zwraca: nowy tryb pracy
+// Rysuj timer włączenia pozycji menu
+// Parametry: chTryb - bieżący tryb pracy
+// Zwraca: nic
 ////////////////////////////////////////////////////////////////////////////////
 void RysujMenuTimer(unsigned short sCzas)
 {
 	setColor(BLUE);
-	fillRect(0, DISP_Y_SIZE-4, sCzas, DISP_Y_SIZE);
+	fillRect(0, DISP_Y_SIZE-4, (int)sCzas, DISP_Y_SIZE);
 	setColor(BLACK);
-	fillRect(sCzas+1, DISP_Y_SIZE-4, DISP_X_SIZE, DISP_Y_SIZE);
+	fillRect((int)sCzas+1, DISP_Y_SIZE-4, DISP_X_SIZE, DISP_Y_SIZE);
 }
 
 
@@ -130,12 +129,24 @@ void RysujMenuTimer(unsigned short sCzas)
 // pozY - współrzędne Y wiersza
 // Zwraca: nic
 ////////////////////////////////////////////////////////////////////////////////
-void RysujDane(char *str, uint16_t dane, uint8_t pozY)
+void WyswietlDane8(char *str, uint8_t dane, uint8_t pozY)
 {
-	//setColor(GRAY40);
 	setColor(GREEN);
-	//sprintf(chNapis, "%s: 0x%X", str, dane);
-	sprintf(chNapis, "%s: %d ", str, dane);
+	sprintf(chNapis, "%s: 0x%X", str, dane);
+	print(chNapis, 10, pozY, 0);
+}
+
+void WyswietlDane32(char *str, uint32_t dane, uint8_t pozY)
+{
+	setColor(BLUE);
+	sprintf(chNapis, "%s: %ld", str, dane);
+	print(chNapis, 10, pozY, 0);
+}
+
+void WyswietlDaneFloat(char *str, float dane, uint8_t pozY)
+{
+	setColor(YELLOW);
+	sprintf(chNapis, "%s: %.2f", str, dane);
 	print(chNapis, 10, pozY, 0);
 }
 
@@ -203,40 +214,39 @@ void InitFraktal(unsigned char chTyp)
 void FraktalTest(unsigned char chTyp)
 {
 	unsigned int nCzas;
-	extern uint8_t chBuforCB[];
 
 	nCzas = HAL_GetTick();
 	switch (chTyp)
 	{
-	case 0:	GenerateJulia(DISP_X_SIZE, DISP_Y_SIZE, DISP_X_SIZE/2, DISP_Y_SIZE/2, 135, (uint16_t*)chBuforCB);
+	case 0:	GenerateJulia(DISP_X_SIZE, DISP_Y_SIZE, DISP_X_SIZE/2, DISP_Y_SIZE/2, 135, (uint16_t*)nBuforKamery);
 			nCzas = MinalCzas(nCzas);
 			sprintf(chNapis, "Julia: t=%dms ", nCzas);
 			fImag -= 0.002;
 			break;
 
 			//ca�y fraktal - rotacja palety
-	case 1: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)chBuforCB);
+	case 1: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)nBuforKamery);
 			nCzas = MinalCzas(nCzas);
 			sprintf(chNapis, "Mandelbrot: t=%dms, p=%d", nCzas, chMnozPalety);
 			chMnozPalety += 1;
 			break;
 
 			//dolina konika x=-0,75, y=0,1
-	case 2: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)chBuforCB);
+	case 2: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)nBuforKamery);
 			nCzas = MinalCzas(nCzas);
 			sprintf(chNapis, "Mandelbrot: t=%dms, p=%d", nCzas, chMnozPalety);
 			fZoom /= 0.9;
 			break;
 
 			//dolina s�onia x=0,25-0,35, y=0,05, zoom=-0,6..-40
-	case 3: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)chBuforCB);
+	case 3: GenerateMandelbrot(fX, fY, fZoom, 30, (uint16_t*)nBuforKamery);
 			nCzas = MinalCzas(nCzas);
 			sprintf(chNapis, "Mandelbrot: t=%dms, p=%d", nCzas, chMnozPalety);
 			fZoom /= 0.9;
 			break;
 	}
 
-	drawBitmap(0, 0, 320, 240, (uint16_t*)chBuforCB);
+	drawBitmap(0, 0, 320, 240, (uint16_t*)nBuforKamery);
 	setFont(MidFont);
 	setColor(GREEN);
 	print(chNapis, 0, 224, 0);
@@ -244,7 +254,7 @@ void FraktalTest(unsigned char chTyp)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// wy�wietl demo z fraktalami
+// wyświetl demo z fraktalami
 // Parametry: nic
 // Zwraca: nic
 ////////////////////////////////////////////////////////////////////////////////
@@ -341,6 +351,11 @@ void GenerateJulia(unsigned short size_x, unsigned short size_y, unsigned short 
 #define CONTROL_SIZE_Y	128
 
 
+////////////////////////////////////////////////////////////////////////////////
+// Generuj fraktal Mandelbrota
+// Parametry:
+// Zwraca: nic
+////////////////////////////////////////////////////////////////////////////////
 void GenerateMandelbrot(float centre_X, float centre_Y, float Zoom, unsigned short IterationMax, unsigned short * buffer)
 {
 	double X_Min = centre_X - 1.0/Zoom;
@@ -386,6 +401,11 @@ void GenerateMandelbrot(float centre_X, float centre_Y, float Zoom, unsigned sho
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+// Konwersja kolorów z HSV na RBG
+// Parametry:
+// Zwraca: nic
+////////////////////////////////////////////////////////////////////////////////
 void HSV2RGB(float hue, float sat, float val, float *red, float *grn, float *blu)
 {
 	int i;
@@ -439,6 +459,20 @@ unsigned int MinalCzas(unsigned int nStart)
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+// Wypisz kod błędu na ekranie
+// Parametry: chErr - kod błędu
+// Zwraca: nic
+////////////////////////////////////////////////////////////////////////////////
+void DispErr(unsigned char chErr)
+{
+	setFont(MidFont);
+	setColor(RED);
+	sprintf(chNapis, "Error %d (0x%X)", chErr, chErr);
+	print(chNapis, 0, 0, 0);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // wyświetla komunikat o sposobie podłączenia
@@ -471,3 +505,42 @@ void WyswietlPomoc(void)
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// wyświetla okno z wynikami analizy ramki eth
+// Parametry:
+// Zwraca: nic
+////////////////////////////////////////////////////////////////////////////////
+void WyswietlAnalizeEth(uint8_t* chAdrEthNad, uint8_t* chAdrIPNad)
+{
+	if (chRysujRaz)
+		{
+			LCD_clear();
+			setFont(MidFont);
+			setColor(GREEN);
+			sprintf(chNapis, "Analiza ramki Ethernet");
+			print(chNapis, 10, 0, 0);
+			chRysujRaz = 0;
+		}
+		setColor(YELLOW);
+		sprintf(chNapis, "Adr Eth Nad: %.2X:%.2X:%.2X:%.2X:%.2X:%.2X", *(chAdrEthNad+0), *(chAdrEthNad+1), *(chAdrEthNad+2), *(chAdrEthNad+3), *(chAdrEthNad+4), *(chAdrEthNad+6));	//adres ramki
+		print(chNapis, 20, 20, 0);
+		sprintf(chNapis, "Adr IP Nad: %.3d.%.3d.%.3d,%.3d", *(chAdrIPNad+0), *(chAdrIPNad+1), *(chAdrIPNad+2), *(chAdrIPNad+3));
+		print(chNapis, 20, 40, 0);
+		/*sprintf(chNapis, "Podglad kamery RAW");
+		print(chNapis, 20, 60, 0);
+		sprintf(chNapis, "Setup 1");
+		print(chNapis, 20, 80, 0);
+		sprintf(chNapis, "Setup 2");
+		print(chNapis, 20, 100, 0);
+		sprintf(chNapis, "Setup 3");
+		print(chNapis, 20, 120, 0);
+		sprintf(chNapis, "Setup 4");
+		print(chNapis, 20, 140, 0);
+		sprintf(chNapis, "Setup 5");
+		print(chNapis, 20, 160, 0);
+		sprintf(chNapis, "Fraktale");
+		print(chNapis, 20, 180, 0);
+		sprintf(chNapis, "Pomocy, kabelki!");
+		print(chNapis, 20, 200, 0);*/
+
+}

@@ -21,7 +21,8 @@
 void KonwersjaRGB565doCB7(uint16_t *obrazRGB565, uint8_t *obrazCB, uint32_t rozmiar)
 {
 	uint16_t pix;
-	for (uint32_t n=0; n<rozmiar; n++)
+	uint32_t n;
+	for (n=0; n<rozmiar; n++)
 	{
 		pix = *(obrazRGB565 + n);
 		//bity czerwony i niebieski mają skalę 5-bitową (32), zielony 6-bitową (64).
@@ -42,9 +43,10 @@ void KonwersjaRGB565doCB7(uint16_t *obrazRGB565, uint8_t *obrazCB, uint32_t rozm
 void KonwersjaCB7doRGB565(uint8_t *obrazCB, uint16_t *obrazCB565, uint32_t rozmiar)
 {
 	uint16_t pixCB, pixRB, pixG;
-	for (uint32_t n=0; n<rozmiar; n++)
+	uint32_t n;
+	for (n=0; n<rozmiar; n++)
 	{
-		pixCB = *(obrazCB+n);
+		pixCB = *(obrazCB + n);
 		pixRB = pixCB >> 2;	//składowe: czerwona i niebieska
 		pixG  = pixCB >> 1;	//składowa zielona
 		*(obrazCB565 + n) = (pixRB << 11) + (pixG << 5) + pixRB;

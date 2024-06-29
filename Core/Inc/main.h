@@ -24,6 +24,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "sys_def.h"
 #include "konfiguracja.h"
+#include "analiza_obrazu.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -142,6 +143,8 @@ void KameraRST_Pin(uint32_t SetReset);
 void LED_Toggle(uint8_t LED);
 extern uint16_t sBuforLCD[];
 extern uint32_t nBuforKamery[];
+extern uint8_t chBuforCB[];
+extern uint8_t chBuforCKraw[];
 extern unsigned char chRysujRaz;	//flaga informująca o konieczności jednorazowego narysowania statycznych elementów ekranu
 extern void InitDisplay(void);
 extern void LCD_clear(void);
@@ -172,6 +175,8 @@ extern void OV5640_OutSize_Set(uint16_t offX, uint16_t offY, uint16_t width, uin
 extern volatile uint8_t chObrazGotowy;
 extern void WyswietlKodBledu(uint8_t blad, uint8_t pozX, uint8_t pozY);
 extern uint8_t CzekajNaBit(volatile uint8_t *chBit, uint16_t sTimeout);
+extern unsigned int MinalCzas(unsigned int nStart);
+extern void WyswietlDane32(char *str, uint32_t dane, uint8_t pozY);
 
 //obróbka obrazu
 extern void KonwersjaRGB565doCB7(uint16_t *obrazRGB565, uint8_t *obrazCB, uint32_t rozmiar);

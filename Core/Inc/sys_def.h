@@ -47,6 +47,8 @@
 #define TP_KAM_SET3		4
 #define TP_KAM_SET4		5
 #define TP_KAM_SET5		6
+#define TP_KAM_CB		5
+#define TP_DET_KRAW		6
 #define TP_FRAKTAL		7
 #define TP_POMOC		8
 #define TP_MENU			10
